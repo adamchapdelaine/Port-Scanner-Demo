@@ -6,6 +6,8 @@ import argparse
 
 # FIELDS
 threads = []
+openPorts = []
+lockPrint = threading.Lock()
 
 q = queue.Queue()
 
@@ -31,12 +33,13 @@ def scan(address, port):
     
     # try TCP connection
     try:
-        s.connect((address, port))
-        print(f'[+] Port {port} is OPEN.')
+        s.connect((address, port)) 
+        with lockPrint:
+            openPorts.append(port)
     
     # exception if target port closed
     except:
-        print(f'[-] Port {port} is CLOSED.')
+        pass
 
 def worker():
     while True:
@@ -44,9 +47,10 @@ def worker():
             currentPort = q.get_nowait()
             scan(address, currentPort)
             q.task_done()
+            print('.', end='', flush=True)
         except:
             break
-
+        
 # filling queue with ports
 for p in portRange:
     q.put(p)
@@ -59,6 +63,11 @@ for i in range(50):
     
 # await scanning completion
 q.join()
-print('\nScanning complete.')
+
+print()
+
+for p in openPorts:
+    print(f'[+] Port {p} is OPEN.') 
+print('\nScanning complete.\n\n')
 
 
