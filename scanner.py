@@ -1,7 +1,14 @@
 import socket
+import threading
+import queue
+
 
 # FIELDS
 address = '192.168.56.101'
+portRange = range(20, 31)
+threads = []
+
+q = queue.Queue()
 
 def scan(address, port):
     # INET, streaming socket
@@ -17,9 +24,27 @@ def scan(address, port):
     except:
         print(f'[-] Port {port} is CLOSED.')
 
+def worker():
+    while True:
+        try:
+            currentPort = q.get_nowait()
+            scan(address, currentPort)
+            q.task_done()
+        except:
+            break
 
-portRange = range(20, 31)
-
-# scans ports in range
+# filling queue with ports
 for p in portRange:
-    scan(address, p)    
+    q.put(p)
+
+# initializing workers
+for i in range(50):
+    t = threading.Thread(target=worker)
+    t.daemon = True # ends threading if program exits
+    t.start()
+    
+# await scanning completion
+q.join()
+print('\nScanning complete.')
+
+
