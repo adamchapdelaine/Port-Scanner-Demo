@@ -60,11 +60,16 @@ for i in range(50):
     t = threading.Thread(target=worker)
     t.daemon = True # ends threading if program exits
     t.start()
+    threads.append(t)
     
 # await scanning completion
 q.join()
 
+for t in threads:
+    t.join()
 print()
+
+openPorts.sort()
 
 for p in openPorts:
     print(f'[+] Port {p} is OPEN.') 
