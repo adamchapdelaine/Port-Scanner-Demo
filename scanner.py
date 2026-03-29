@@ -1,14 +1,28 @@
 import socket
 import threading
 import queue
+import argparse
 
 
 # FIELDS
-address = '192.168.56.101'
-portRange = range(20, 31)
 threads = []
 
 q = queue.Queue()
+
+# add parser
+parser = argparse.ArgumentParser(description="A multi-threaded port scanner")
+parser.add_argument("target", help="The IP address to scan")
+parser.add_argument("--ports", help='Port range to scan (e.g., 1-100)', default='1-1000')
+
+args = parser.parse_args()
+address = args.target
+
+if '-' in args.ports:
+    portParts = args.ports.split('-')
+    portRange = range(int(portParts[0]),int(portParts[1]) + 1)
+else:
+    portRange = range(int(args.ports), int(args.ports) + 1)
+    
 
 def scan(address, port):
     # INET, streaming socket
