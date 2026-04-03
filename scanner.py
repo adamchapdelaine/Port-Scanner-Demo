@@ -26,7 +26,7 @@ def scan(address, port):
         with lockPrint:
             openPorts.append(port)
 
-    except:
+    except: # Log exception to file/console
         # If connection fails (port closed/timeout), ignore error and proceed
         pass
 
